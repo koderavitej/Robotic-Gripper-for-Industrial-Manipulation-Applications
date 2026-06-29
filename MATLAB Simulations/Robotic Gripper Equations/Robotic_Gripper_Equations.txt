@@ -1,0 +1,467 @@
+Robotic Gripper Project — Mathematical Equations Used
+
+This file explains the equations used in the MATLAB robotic gripper simulation and result figures.
+
+------------------------------------------------------------
+
+#1. Finger Closing Ratio
+
+The main control variable is the closing ratio:
+
+\[
+c = \text{finger closing ratio}
+\]
+
+\[
+c = 0 \Rightarrow \text{fingers fully open}
+\]
+
+\[
+c = 1 \Rightarrow \text{fingers fully closed / object gripped}
+\]
+
+------------------------------------------------------------
+
+#2. Motor Input Angle
+
+The motor angle increases as the fingers close:
+
+\[
+\theta_m = \theta_{max} \times c
+\]
+
+In the code:
+
+\[
+\theta_{max} = 78^\circ
+\]
+
+So:
+
+\[
+\theta_m = 78c
+\]
+
+------------------------------------------------------------
+
+#3. Contact-Bar Displacement
+
+The contact bar displacement is proportional to the finger closing ratio:
+
+\[
+d = d_{max} \times c
+\]
+
+In the code:
+
+\[
+d_{max} = 11.1 \text{ mm}
+\]
+
+So:
+
+\[
+d = 11.1c
+\]
+
+------------------------------------------------------------
+
+#4. Fingertip Bending Angle
+
+The passive fingertip bending angle is modeled using an exponential response:
+
+\[
+\theta_f = 65.7^\circ \left(1 - e^{-2.1c}\right)
+\]
+
+or using contact-bar displacement:
+
+\[
+\theta_f = 65.7^\circ \left(1 - e^{-d/5.2}\right)
+\]
+
+This shows that the finger bends quickly at first and then approaches a maximum bending angle.
+
+------------------------------------------------------------
+
+#5. Fingertip Path
+
+The fingertip path is shown as an arc:
+
+\[
+x = R\cos(\theta)
+\]
+
+\[
+y = R\sin(\theta)
+\]
+
+In the code:
+
+\[
+R = 45 \text{ mm}
+\]
+
+So:
+
+\[
+x = 45\cos(\theta)
+\]
+
+\[
+y = 45\sin(\theta)
+\]
+
+------------------------------------------------------------
+
+#6. Contact Ratio
+
+The spring starts compressing only after the finger contacts the object:
+
+\[
+r_c = \max\left(\frac{c - c_0}{1 - c_0}, 0\right)
+\]
+
+where:
+
+\[
+c_0 = 0.40
+\]
+
+------------------------------------------------------------
+
+#7. Back Spring Compression
+
+The back spring compresses after contact:
+
+\[
+x_b = x_{b,max} \times r_c
+\]
+
+In the code:
+
+\[
+x_{b,max} = 10 \text{ mm}
+\]
+
+So:
+
+\[
+x_b = 10r_c
+\]
+
+------------------------------------------------------------
+
+#8. Inner Bar Spring Compression
+
+The inner bar spring gives extra tightening force. It engages later:
+
+\[
+r_i = \max\left(\frac{c - 0.62}{1 - 0.62}, 0\right)
+\]
+
+\[
+x_i = x_{i,max} \times r_i
+\]
+
+In the code:
+
+\[
+x_{i,max} = 7 \text{ mm}
+\]
+
+So:
+
+\[
+x_i = 7r_i
+\]
+
+------------------------------------------------------------
+
+#9. Hooke's Law for Springs
+
+Hooke’s Law:
+
+\[
+F = kx
+\]
+
+Back spring force:
+
+\[
+F_b = k_b x_b
+\]
+
+Inner spring force:
+
+\[
+F_i = k_i x_i
+\]
+
+In the code:
+
+\[
+k_b = 0.45 \text{ N/mm}
+\]
+
+\[
+k_i = 0.35 \text{ N/mm}
+\]
+
+So:
+
+\[
+F_b = 0.45x_b
+\]
+
+\[
+F_i = 0.35x_i
+\]
+
+------------------------------------------------------------
+
+#10. Total Grip Force
+
+The gripper has three fingers, so total grip force is:
+
+\[
+F_{grip} = 3(F_b + F_i + F_{pin})
+\]
+
+Pin-hole preload force:
+
+\[
+F_{pin} = P_{pin}c
+\]
+
+For selected pin hole:
+
+\[
+P_{pin} = 2.0 \text{ N}
+\]
+
+Final equation:
+
+\[
+F_{grip} = 3(k_bx_b + k_ix_i + P_{pin}c)
+\]
+
+------------------------------------------------------------
+
+#11. Required Holding Force
+
+To check whether the object will fall or not:
+
+\[
+F_{required} = \frac{mg \times SF}{\mu}
+\]
+
+where:
+
+\[
+m = 0.35 \text{ kg}
+\]
+
+\[
+g = 9.81 \text{ m/s}^2
+\]
+
+\[
+SF = 1.5
+\]
+
+\[
+\mu = 0.65
+\]
+
+So:
+
+\[
+F_{required} = \frac{0.35 \times 9.81 \times 1.5}{0.65}
+\]
+
+------------------------------------------------------------
+
+#12. Grip Safety Margin
+
+The safety margin tells whether the object is held securely:
+
+\[
+\text{Safety Margin} = \frac{F_{grip}}{F_{required}}
+\]
+
+If:
+
+\[
+\text{Safety Margin} > 1
+\]
+
+then the object is safely gripped.
+
+------------------------------------------------------------
+
+#13. Object Movement Equation
+
+After the object is gripped, it moves with the robot:
+
+\[
+P(t) = P_0 + t(P_{target} - P_0)
+\]
+
+where:
+
+\[
+0 \leq t \leq 1
+\]
+
+In the code, the target shift is:
+
+\[
+[95,\ 25,\ 45]
+\]
+
+So the object position becomes:
+
+\[
+P(t) = P_0 + t[95,\ 25,\ 45]
+\]
+
+------------------------------------------------------------
+
+#14. Rotation Equation
+
+Object rotation is controlled by:
+
+\[
+\theta(t) = \theta_{target}t
+\]
+
+For a 180° rotation:
+
+\[
+\theta(t) = 180t
+\]
+
+Rotation matrix around the z-axis:
+
+\[
+R_z =
+\begin{bmatrix}
+\cos\theta & -\sin\theta & 0 \\
+\sin\theta & \cos\theta & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+\]
+
+Updated point position:
+
+\[
+P' = R_zP + T
+\]
+
+------------------------------------------------------------
+
+#15. Object Size Equations
+
+All objects use fixed length and width to avoid gaps:
+
+\[
+L = 0.92s
+\]
+
+\[
+W = 0.92s
+\]
+
+##Cube
+
+\[
+L = W = H
+\]
+
+##Square Block
+
+\[
+L = W
+\]
+
+\[
+H = 0.55L
+\]
+
+##Circular / Cylinder Object
+
+\[
+D = 1.14L
+\]
+
+\[
+H = 0.75L
+\]
+
+The circular object uses a slightly larger diameter because curved sides can leave a visible gap.
+
+##Rectangular Block
+
+\[
+L = W
+\]
+
+\[
+H = 0.70L
+\]
+
+------------------------------------------------------------
+
+#16. Performance Score
+
+The performance score combines four design factors:
+
+\[
+Score = \frac{S + B + N + W}{4}
+\]
+
+where:
+
+\[
+S = \text{smoothness score}
+\]
+
+\[
+B = \text{bending performance}
+\]
+
+\[
+N = \text{no-locking score}
+\]
+
+\[
+W = \text{object wrapping score}
+\]
+
+------------------------------------------------------------
+
+#17. Result Figure Mapping
+
+The result figures generated by the MATLAB code correspond to these points:
+
+1. `result_01_kinematics_finger_mechanism.png`  
+   Kinematics of finger mechanism.
+
+2. `result_02_input_output_relationship.png`  
+   Contact-bar displacement versus fingertip angle.
+
+3. `result_03_dimension_optimization.png`  
+   Linkage dimension optimization.
+
+4. `result_04_performance_comparison.png`  
+   Performance comparison of tested designs.
+
+5. `result_05_final_optimized_design.png`  
+   Final selected optimized dimensions.
+
+6. `result_06_grasping_performance_objects.png`  
+   Grasping behavior for sphere, cylinder, and cube.
+
+7. `result_07_before_vs_after_comparison.png`  
+   Old design versus improved design comparison.
